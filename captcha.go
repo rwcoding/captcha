@@ -54,6 +54,8 @@ type Options struct {
 	// Palette is the set of colors to chose from
 	Palette color.Palette
 
+	Generator func() (string, string)
+
 	width  int
 	height int
 }
@@ -134,7 +136,12 @@ func New(width int, height int, option ...SetOption) (*Data, error) {
 		setOption(options)
 	}
 
-	text := randomText(options)
+	text := ""
+	if options.Generator != nil {
+		text, _ = options.Generator()
+	} else {
+		text = randomText(options)
+	}
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(img, img.Bounds(), &image.Uniform{options.BackgroundColor}, image.Point{}, draw.Src)
 	drawNoise(img, options)
@@ -155,7 +162,13 @@ func NewMathExpr(width int, height int, option ...SetOption) (*Data, error) {
 		setOption(options)
 	}
 
-	text, equation := randomEquation()
+	text := ""
+	equation := ""
+	if options.Generator != nil {
+		text, equation = options.Generator()
+	} else {
+		text, equation = randomEquation()
+	}
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(img, img.Bounds(), &image.Uniform{options.BackgroundColor}, image.Point{}, draw.Src)
 	drawNoise(img, options)
